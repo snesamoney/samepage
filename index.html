@@ -362,10 +362,18 @@
             box-shadow: 0 3px 10px rgba(61, 40, 23, 0.1);
         }
 
+        #profileDisplay {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
         .profile-info {
             display: flex;
             align-items: center;
             gap: 15px;
+            flex: 1;
         }
 
         .profile-label {
@@ -491,7 +499,7 @@
             </div>
 
             <!-- Profile display (after setup) -->
-            <div id="profileDisplay" style="display: none; width: 100%;">
+            <div id="profileDisplay" style="display: none;">
                 <div class="profile-info">
                     <span class="profile-label">Signed in as:</span>
                     <span class="profile-name" id="displayName"></span>
