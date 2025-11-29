@@ -4,6 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SamePage - Find Study Buddies</title>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCXkITyLcANceYAC6SVPNsJgE1uExKuWQ",
+            authDomain: "samepage-1cf48.firebaseapp.com",
+            projectId: "samepage-1cf48",
+            storageBucket: "samepage-1cf48.firebasestorage.app",
+            messagingSenderId: "130384622334",
+            appId: "1:130384622334:web:3b4c0ec52371dc18b82baf",
+            measurementId: "G-1SBXT1T1H6"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make db available globally
+        window.db = db;
+        window.firestoreModules = { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy };
+    </script>
+
     <style>
         /* ========================================
            CSS STYLES - CAFÉ THEME
@@ -552,11 +579,8 @@
             // Load current user profile
             loadUserProfile();
 
-            // Load students from localStorage
-            loadFromLocalStorage();
-
-            // Render the dashboard
-            renderDashboard();
+            // Set up real-time listener for Firestore
+            setupRealtimeListener();
         }
 
         // ============================================
@@ -660,7 +684,7 @@
          * Handles the check-in form submission
          * Validates input, creates a new student entry, and updates the dashboard
          */
-        document.getElementById('checkInForm').addEventListener('submit', function(e) {
+        document.getElementById('checkInForm').addEventListener('submit', async function(e) {
             e.preventDefault(); // Prevent page reload
 
             // Check if user already has an active check-in
@@ -691,11 +715,8 @@
                 owner: currentUser // Track who created this entry
             };
 
-            // Add to students array
-            students.push(student);
-
-            // Save to localStorage
-            saveToLocalStorage();
+            // Add to Firestore (real-time database)
+            await addStudentToFirestore(student);
 
             // Show success message
             showSuccess(`You're checked in for ${classCode}!`);
@@ -704,8 +725,7 @@
             document.getElementById('classSelect').value = '';
             document.getElementById('notesInput').value = '';
 
-            // Re-render the dashboard
-            renderDashboard();
+            // Dashboard will auto-update via real-time listener
         });
 
         // ============================================
@@ -776,7 +796,7 @@
                 checkoutBtn.className = 'checkout-btn';
                 checkoutBtn.textContent = 'Check Out';
                 checkoutBtn.onclick = function() {
-                    checkoutStudent(student.id);
+                    checkoutStudent(student.firestoreId);
                 };
                 card.appendChild(checkoutBtn);
             }
@@ -786,10 +806,10 @@
 
         /**
          * Removes a student from the dashboard (checkout)
-         * @param {number} studentId - The ID of the student to remove
+         * @param {string} firestoreId - The Firestore document ID of the student to remove
          */
-        function checkoutStudent(studentId) {
-            const student = students.find(s => s.id === studentId);
+        async function checkoutStudent(firestoreId) {
+            const student = students.find(s => s.firestoreId === firestoreId);
 
             if (!student) {
                 showError('Student not found');
@@ -802,17 +822,13 @@
                 return;
             }
 
-            // Remove from array
-            students = students.filter(s => s.id !== studentId);
-
-            // Save to localStorage
-            saveToLocalStorage();
+            // Remove from Firestore (real-time database)
+            await removeStudentFromFirestore(firestoreId);
 
             // Show success message
             showSuccess('You have been checked out!');
 
-            // Re-render the dashboard
-            renderDashboard();
+            // Dashboard will auto-update via real-time listener
         }
 
         // ============================================
@@ -828,35 +844,71 @@
         });
 
         // ============================================
-        // LOCAL STORAGE FUNCTIONS
+        // FIRESTORE FUNCTIONS (Real-time Database)
         // ============================================
 
         /**
-         * Saves the students array to localStorage
-         * This persists data across page refreshes
+         * Sets up real-time listener for students collection
+         * Automatically updates the dashboard when data changes
          */
-        function saveToLocalStorage() {
+        function setupRealtimeListener() {
+            const { collection, query, orderBy, onSnapshot } = window.firestoreModules;
+            const studentsRef = collection(window.db, 'students');
+            const q = query(studentsRef, orderBy('timestamp', 'desc'));
+
+            // Listen for real-time updates
+            onSnapshot(q, (snapshot) => {
+                students = [];
+                snapshot.forEach((doc) => {
+                    students.push({
+                        firestoreId: doc.id, // Store Firestore document ID
+                        ...doc.data()
+                    });
+                });
+                renderDashboard();
+            }, (error) => {
+                console.error('Error loading students:', error);
+                showError('Failed to load students from database');
+            });
+        }
+
+        /**
+         * Adds a student to Firestore
+         */
+        async function addStudentToFirestore(student) {
             try {
-                localStorage.setItem('samePageStudents', JSON.stringify(students));
+                const { collection, addDoc } = window.firestoreModules;
+                const studentsRef = collection(window.db, 'students');
+                await addDoc(studentsRef, student);
             } catch (e) {
-                console.error('Failed to save to localStorage:', e);
+                console.error('Failed to add student:', e);
+                showError('Failed to check in. Please try again.');
             }
         }
 
         /**
-         * Loads students from localStorage on page load
-         * If no data exists, initializes with empty array
+         * Removes a student from Firestore
          */
-        function loadFromLocalStorage() {
+        async function removeStudentFromFirestore(firestoreId) {
             try {
-                const stored = localStorage.getItem('samePageStudents');
-                if (stored) {
-                    students = JSON.parse(stored);
-                }
+                const { doc, deleteDoc } = window.firestoreModules;
+                const studentRef = doc(window.db, 'students', firestoreId);
+                await deleteDoc(studentRef);
             } catch (e) {
-                console.error('Failed to load from localStorage:', e);
-                students = [];
+                console.error('Failed to remove student:', e);
+                showError('Failed to check out. Please try again.');
             }
+        }
+
+        /**
+         * Legacy localStorage functions - keep for user profile only
+         */
+        function saveToLocalStorage() {
+            // No longer used for students data, only for backward compatibility
+        }
+
+        function loadFromLocalStorage() {
+            // No longer used for students data, only for backward compatibility
         }
 
         // ============================================
