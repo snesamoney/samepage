@@ -26,9 +26,13 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Make db available globally
+        // Make db and modules available globally
         window.db = db;
         window.firestoreModules = { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy };
+
+        // Signal that Firebase is ready
+        window.firebaseReady = true;
+        window.dispatchEvent(new Event('firebaseReady'));
     </script>
 
     <style>
@@ -572,8 +576,14 @@
         // INITIALIZATION
         // ============================================
 
-        // Initialize on page load
-        initializeApp();
+        // Wait for Firebase to be ready, then initialize
+        if (window.firebaseReady) {
+            initializeApp();
+        } else {
+            window.addEventListener('firebaseReady', function() {
+                initializeApp();
+            });
+        }
 
         function initializeApp() {
             // Load current user profile
