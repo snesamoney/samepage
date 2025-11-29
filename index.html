@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SamePage - Find Study Buddies</title>
+    <style>
+        /* ========================================
+           CSS STYLES - CAFÉ THEME
+           ======================================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', 'Palatino', serif;
+            background: linear-gradient(135deg, #f5e6d3 0%, #e8d5c4 100%);
+            background-attachment: fixed;
+            color: #3d2817;
+            line-height: 1.6;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Coffee bean pattern overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(139, 90, 43, 0.03) 1px, transparent 1px),
+                radial-gradient(circle at 60% 70%, rgba(139, 90, 43, 0.03) 1px, transparent 1px),
+                radial-gradient(circle at 80% 10%, rgba(139, 90, 43, 0.03) 1px, transparent 1px);
+            background-size: 100px 100px, 150px 150px, 120px 120px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #6f4e37 0%, #8b5a2b 100%);
+            padding: 40px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(61, 40, 23, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Coffee steam effect */
+        header::before {
+            content: '☕';
+            position: absolute;
+            font-size: 80px;
+            opacity: 0.1;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: #f5e6d3;
+            margin-bottom: 10px;
+            font-family: 'Georgia', serif;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+        }
+
+        .tagline {
+            color: #d4a574;
+            font-size: 1.2rem;
+            font-style: italic;
+            font-family: 'Georgia', serif;
+        }
+
+        /* Check-in Form Section */
+        .section {
+            background: #faf7f2;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(61, 40, 23, 0.15);
+            margin-bottom: 30px;
+            border: 3px solid #d4a574;
+            position: relative;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #6f4e37, #8b5a2b, #a0826d, #8b5a2b, #6f4e37);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #6f4e37;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #c9a87c;
+            font-family: 'Georgia', serif;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '☕';
+            margin-left: 12px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #6f4e37;
+            font-weight: 600;
+            font-size: 1.05rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #d4a574;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #8b5a2b;
+            box-shadow: 0 0 0 4px rgba(139, 90, 43, 0.1);
+            background-color: #fffef8;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #6f4e37 0%, #8b5a2b 100%);
+            color: #fff;
+            padding: 14px 35px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(61, 40, 23, 0.3);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #8b5a2b 0%, #6f4e37 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(61, 40, 23, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Dashboard Section */
+        .filter-controls {
+            margin-bottom: 25px;
+            background-color: #f5ede0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #8b5a2b;
+        }
+
+        .filter-controls label {
+            display: inline-block;
+            margin-right: 12px;
+            color: #6f4e37;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .filter-controls select {
+            width: auto;
+            display: inline-block;
+            min-width: 200px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .student-card {
+            background: linear-gradient(135deg, #ffffff 0%, #faf7f2 100%);
+            border: 2px solid #d4a574;
+            border-radius: 10px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(61, 40, 23, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .student-card::before {
+            content: '☕';
+            position: absolute;
+            font-size: 60px;
+            opacity: 0.05;
+            right: -10px;
+            bottom: -10px;
+            transform: rotate(-15deg);
+        }
+
+        .student-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(61, 40, 23, 0.2);
+            border-color: #8b5a2b;
+        }
+
+        .student-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #6f4e37;
+            margin-bottom: 10px;
+            font-family: 'Georgia', serif;
+            position: relative;
+            z-index: 1;
+        }
+
+        .student-class {
+            display: inline-block;
+            background: linear-gradient(135deg, #8b5a2b 0%, #a0826d 100%);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(61, 40, 23, 0.2);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            position: relative;
+            z-index: 1;
+        }
+
+        .student-notes {
+            color: #6f4e37;
+            font-size: 0.95rem;
+            font-style: italic;
+            line-height: 1.5;
+            font-family: 'Georgia', serif;
+            position: relative;
+            z-index: 1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8b5a2b;
+            font-size: 1.2rem;
+            font-style: italic;
+            font-family: 'Georgia', serif;
+        }
+
+        .empty-state::before {
+            content: '☕';
+            display: block;
+            font-size: 60px;
+            opacity: 0.3;
+            margin-bottom: 15px;
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #c44536 0%, #a83a2d 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            box-shadow: 0 3px 10px rgba(196, 69, 54, 0.3);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #6f9654 0%, #5a7d44 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            box-shadow: 0 3px 10px rgba(111, 150, 84, 0.3);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        /* User Profile Section */
+        .profile-section {
+            background: linear-gradient(135deg, #f5ede0 0%, #fff9f0 100%);
+            padding: 20px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px solid #d4a574;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 3px 10px rgba(61, 40, 23, 0.1);
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-label {
+            color: #6f4e37;
+            font-weight: 600;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .profile-name {
+            color: #8b5a2b;
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: 'Georgia', serif;
+        }
+
+        .change-name-btn {
+            background: transparent;
+            color: #8b5a2b;
+            padding: 8px 20px;
+            border: 2px solid #8b5a2b;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            box-shadow: none;
+        }
+
+        .change-name-btn:hover {
+            background: #8b5a2b;
+            color: white;
+            transform: translateY(0);
+        }
+
+        .profile-setup {
+            text-align: center;
+        }
+
+        .profile-setup h3 {
+            color: #6f4e37;
+            margin-bottom: 15px;
+            font-family: 'Georgia', serif;
+        }
+
+        .profile-setup input {
+            margin-bottom: 15px;
+            max-width: 300px;
+        }
+
+        /* Checkout Button */
+        .checkout-btn {
+            background: linear-gradient(135deg, #c44536 0%, #a83a2d 100%);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(196, 69, 54, 0.3);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: block;
+            width: 100%;
+        }
+
+        .checkout-btn:hover {
+            background: linear-gradient(135deg, #a83a2d 0%, #c44536 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(196, 69, 54, 0.4);
+        }
+
+        .checkout-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 25px;
+            }
+
+            header::before {
+                font-size: 50px;
+                right: 15px;
+            }
+
+            .profile-section {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .profile-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SamePage</h1>
+            <p class="tagline">Find your classmates at CoHo!</p>
+        </header>
+
+        <!-- USER PROFILE SECTION -->
+        <div id="profileSection" class="profile-section" style="display: none;">
+            <!-- Profile setup (first time) -->
+            <div id="profileSetup" class="profile-setup" style="display: none;">
+                <h3>Welcome! What's your name?</h3>
+                <input type="text" id="profileNameInput" placeholder="Enter your name">
+                <button onclick="saveUserProfile()">Save My Name</button>
+            </div>
+
+            <!-- Profile display (after setup) -->
+            <div id="profileDisplay" style="display: none; width: 100%;">
+                <div class="profile-info">
+                    <span class="profile-label">Signed in as:</span>
+                    <span class="profile-name" id="displayName"></span>
+                </div>
+                <button class="change-name-btn" onclick="changeUserName()">Change Name</button>
+            </div>
+        </div>
+
+        <!-- CHECK-IN FORM SECTION -->
+        <section class="section">
+            <h2 class="section-title">Check In</h2>
+
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+
+            <form id="checkInForm">
+                <div class="form-group">
+                    <label for="nameInput">Your Name</label>
+                    <input type="text" id="nameInput" placeholder="Your name" required readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label for="classSelect">Class *</label>
+                    <select id="classSelect" required>
+                        <option value="">-- Select a class --</option>
+                        <option value="CS106A">CS106A</option>
+                        <option value="MATH51">MATH51</option>
+                        <option value="PWR2">PWR2</option>
+                        <option value="ECON1">ECON1</option>
+                        <option value="BIO82">BIO82</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="notesInput">Notes (optional)</label>
+                    <textarea id="notesInput" placeholder="e.g., Problem Set 3, Midterm review, etc."></textarea>
+                </div>
+
+                <button type="submit">Check In</button>
+            </form>
+        </section>
+
+        <!-- DASHBOARD SECTION -->
+        <section class="section">
+            <h2 class="section-title">Who's studying?</h2>
+
+            <div class="filter-controls">
+                <label for="filterSelect">Filter by class:</label>
+                <select id="filterSelect">
+                    <option value="all">All Classes</option>
+                    <option value="CS106A">CS106A</option>
+                    <option value="MATH51">MATH51</option>
+                    <option value="PWR2">PWR2</option>
+                    <option value="ECON1">ECON1</option>
+                    <option value="BIO82">BIO82</option>
+                </select>
+            </div>
+
+            <div id="dashboard" class="dashboard-grid">
+                <!-- Student cards will be dynamically inserted here -->
+            </div>
+        </section>
+    </div>
+
+    <script>
+        /* ========================================
+           JAVASCRIPT - DATA AND FUNCTIONS
+           ======================================== */
+
+        // ============================================
+        // DATA STORAGE
+        // ============================================
+
+        // This array holds all checked-in students in memory
+        // Each student object has: { name, class, notes, id, timestamp, owner }
+        let students = [];
+
+        // Current user's name
+        let currentUser = '';
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        // Initialize on page load
+        initializeApp();
+
+        function initializeApp() {
+            // Load current user profile
+            loadUserProfile();
+
+            // Load students from localStorage
+            loadFromLocalStorage();
+
+            // Render the dashboard
+            renderDashboard();
+        }
+
+        // ============================================
+        // USER PROFILE MANAGEMENT
+        // ============================================
+
+        /**
+         * Loads the user profile from localStorage
+         * If no profile exists, shows the profile setup screen
+         */
+        function loadUserProfile() {
+            try {
+                const savedName = localStorage.getItem('samePageUserName');
+                if (savedName) {
+                    currentUser = savedName;
+                    showProfileDisplay();
+                    document.getElementById('nameInput').value = currentUser;
+                } else {
+                    showProfileSetup();
+                }
+            } catch (e) {
+                console.error('Failed to load user profile:', e);
+                showProfileSetup();
+            }
+        }
+
+        /**
+         * Shows the profile setup screen (first time users)
+         */
+        function showProfileSetup() {
+            document.getElementById('profileSection').style.display = 'block';
+            document.getElementById('profileSetup').style.display = 'block';
+            document.getElementById('profileDisplay').style.display = 'none';
+        }
+
+        /**
+         * Shows the profile display (returning users)
+         */
+        function showProfileDisplay() {
+            document.getElementById('profileSection').style.display = 'block';
+            document.getElementById('profileSetup').style.display = 'none';
+            document.getElementById('profileDisplay').style.display = 'flex';
+            document.getElementById('displayName').textContent = currentUser;
+        }
+
+        /**
+         * Saves the user's name to their profile
+         */
+        function saveUserProfile() {
+            const nameInput = document.getElementById('profileNameInput');
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                alert('Please enter your name');
+                return;
+            }
+
+            currentUser = name;
+            localStorage.setItem('samePageUserName', name);
+
+            // Update the form's name input
+            document.getElementById('nameInput').value = currentUser;
+
+            showProfileDisplay();
+        }
+
+        /**
+         * Allows the user to change their name
+         */
+        function changeUserName() {
+            const newName = prompt('Enter your new name:', currentUser);
+
+            if (newName && newName.trim()) {
+                const trimmedName = newName.trim();
+
+                // Update all existing entries from this user to the new name
+                students.forEach(student => {
+                    if (student.owner === currentUser) {
+                        student.name = trimmedName;
+                        student.owner = trimmedName;
+                    }
+                });
+
+                // Update current user and save
+                currentUser = trimmedName;
+                localStorage.setItem('samePageUserName', currentUser);
+                document.getElementById('nameInput').value = currentUser;
+
+                // Save and re-render
+                saveToLocalStorage();
+                showProfileDisplay();
+                renderDashboard();
+            }
+        }
+
+        // ============================================
+        // FORM SUBMISSION HANDLER
+        // ============================================
+
+        /**
+         * Handles the check-in form submission
+         * Validates input, creates a new student entry, and updates the dashboard
+         */
+        document.getElementById('checkInForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent page reload
+
+            // Check if user already has an active check-in
+            const existingCheckIn = students.find(s => s.owner === currentUser);
+            if (existingCheckIn) {
+                showError('You are already checked in! Check out first to update your status.');
+                return;
+            }
+
+            // Get form values
+            const name = currentUser; // Use current user's name
+            const classCode = document.getElementById('classSelect').value;
+            const notes = document.getElementById('notesInput').value.trim();
+
+            // Validate required fields
+            if (!name || !classCode) {
+                showError('Please fill in all required fields (Name and Class)');
+                return;
+            }
+
+            // Create student object with owner tracking
+            const student = {
+                id: Date.now(), // Simple unique ID based on timestamp
+                name: name,
+                class: classCode,
+                notes: notes || '',
+                timestamp: new Date().toISOString(),
+                owner: currentUser // Track who created this entry
+            };
+
+            // Add to students array
+            students.push(student);
+
+            // Save to localStorage
+            saveToLocalStorage();
+
+            // Show success message
+            showSuccess(`You're checked in for ${classCode}!`);
+
+            // Clear only the class and notes fields
+            document.getElementById('classSelect').value = '';
+            document.getElementById('notesInput').value = '';
+
+            // Re-render the dashboard
+            renderDashboard();
+        });
+
+        // ============================================
+        // DASHBOARD RENDERING
+        // ============================================
+
+        /**
+         * Renders all student cards to the dashboard
+         * Applies the current filter selection
+         */
+        function renderDashboard() {
+            const dashboard = document.getElementById('dashboard');
+            const filterValue = document.getElementById('filterSelect').value;
+
+            // Filter students based on selected class
+            let filteredStudents = students;
+            if (filterValue !== 'all') {
+                filteredStudents = students.filter(student => student.class === filterValue);
+            }
+
+            // Clear current dashboard
+            dashboard.innerHTML = '';
+
+            // If no students, show empty state
+            if (filteredStudents.length === 0) {
+                dashboard.innerHTML = '<div class="empty-state">No students checked in yet. Be the first!</div>';
+                return;
+            }
+
+            // Create and append student cards
+            filteredStudents.forEach(student => {
+                const card = createStudentCard(student);
+                dashboard.appendChild(card);
+            });
+        }
+
+        /**
+         * Creates a DOM element for a student card
+         * @param {Object} student - Student object with name, class, notes, owner
+         * @returns {HTMLElement} - The student card element
+         */
+        function createStudentCard(student) {
+            const card = document.createElement('div');
+            card.className = 'student-card';
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'student-name';
+            nameDiv.textContent = student.name;
+
+            const classDiv = document.createElement('div');
+            classDiv.className = 'student-class';
+            classDiv.textContent = student.class;
+
+            card.appendChild(nameDiv);
+            card.appendChild(classDiv);
+
+            // Add notes if they exist
+            if (student.notes) {
+                const notesDiv = document.createElement('div');
+                notesDiv.className = 'student-notes';
+                notesDiv.textContent = student.notes;
+                card.appendChild(notesDiv);
+            }
+
+            // Add checkout button if this is the current user's card
+            if (student.owner === currentUser) {
+                const checkoutBtn = document.createElement('button');
+                checkoutBtn.className = 'checkout-btn';
+                checkoutBtn.textContent = 'Check Out';
+                checkoutBtn.onclick = function() {
+                    checkoutStudent(student.id);
+                };
+                card.appendChild(checkoutBtn);
+            }
+
+            return card;
+        }
+
+        /**
+         * Removes a student from the dashboard (checkout)
+         * @param {number} studentId - The ID of the student to remove
+         */
+        function checkoutStudent(studentId) {
+            const student = students.find(s => s.id === studentId);
+
+            if (!student) {
+                showError('Student not found');
+                return;
+            }
+
+            // Verify ownership
+            if (student.owner !== currentUser) {
+                showError('You can only check out yourself');
+                return;
+            }
+
+            // Remove from array
+            students = students.filter(s => s.id !== studentId);
+
+            // Save to localStorage
+            saveToLocalStorage();
+
+            // Show success message
+            showSuccess('You have been checked out!');
+
+            // Re-render the dashboard
+            renderDashboard();
+        }
+
+        // ============================================
+        // FILTER FUNCTIONALITY
+        // ============================================
+
+        /**
+         * Handles changes to the class filter dropdown
+         * Re-renders dashboard with filtered results
+         */
+        document.getElementById('filterSelect').addEventListener('change', function() {
+            renderDashboard();
+        });
+
+        // ============================================
+        // LOCAL STORAGE FUNCTIONS
+        // ============================================
+
+        /**
+         * Saves the students array to localStorage
+         * This persists data across page refreshes
+         */
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('samePageStudents', JSON.stringify(students));
+            } catch (e) {
+                console.error('Failed to save to localStorage:', e);
+            }
+        }
+
+        /**
+         * Loads students from localStorage on page load
+         * If no data exists, initializes with empty array
+         */
+        function loadFromLocalStorage() {
+            try {
+                const stored = localStorage.getItem('samePageStudents');
+                if (stored) {
+                    students = JSON.parse(stored);
+                }
+            } catch (e) {
+                console.error('Failed to load from localStorage:', e);
+                students = [];
+            }
+        }
+
+        // ============================================
+        // MESSAGE DISPLAY FUNCTIONS
+        // ============================================
+
+        /**
+         * Shows an error message to the user
+         * @param {string} message - Error message to display
+         */
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+
+            // Hide success message if showing
+            document.getElementById('successMessage').style.display = 'none';
+
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        /**
+         * Shows a success message to the user
+         * @param {string} message - Success message to display
+         */
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+
+            // Hide error message if showing
+            document.getElementById('errorMessage').style.display = 'none';
+
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // ============================================
+        // BACKEND INTEGRATION POINTS
+        // ============================================
+
+        /*
+         * TO CONNECT TO A REAL BACKEND:
+         *
+         * 1. Replace the `students` array with API calls
+         *
+         * 2. Add user authentication (login/logout)
+         *    - Replace localStorage profile with JWT or session-based auth
+         *    - Get currentUser from authenticated session
+         *
+         * 3. In the form submission handler:
+         *    - Make a POST request to /api/checkin with auth token:
+         *      fetch('/api/checkin', {
+         *          method: 'POST',
+         *          headers: {
+         *              'Content-Type': 'application/json',
+         *              'Authorization': 'Bearer ' + token
+         *          },
+         *          body: JSON.stringify(student)
+         *      })
+         *
+         * 4. In checkoutStudent():
+         *    - Make a DELETE request to /api/checkin/:id with auth token
+         *
+         * 5. In loadFromLocalStorage():
+         *    - Replace with GET /api/students to fetch all active check-ins
+         *
+         * 6. Backend should verify ownership on all operations
+         */
+    </script>
+</body>
+</html>
